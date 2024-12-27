@@ -1,0 +1,15 @@
+{
+  "scripts": {
+  "dev": "nodemon",
+  "build": "tsc --project ./"
+},
+  "dependencies": {
+    "node": "^23.5.0",
+    "ts": "^0.2.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.2"
+  }
+}
