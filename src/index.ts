@@ -1,57 +1,72 @@
 interface CurrencyResult<T extends string> {
-          amount: number
-          base: string
-          date: string
-          rates: Record<T , number>
-      }
+  amount: number
+  base: string
+  date: string
+  rates: Record<T , number>
+}
+
+function cache(method: Function,context : unknown){
+//@ts-ignore
+return async function a(this,
+from: string,
+to: string,
+amount: number
+)  {
+const key = `${from}${to}`
+
+if (this.caches[key]) return this.cache[key] *amount
 
 
-class Currency <const Currencies > {
-          api = 'https://api.frankfurter.app'
+const result = await  method.bind(this) (from,to,amount)
 
-          private caches: Record<string, number> = {}
-          constructor(public currencies: Currencies ) {}
+const rate = result.rates[to]
+this.caches[key] = rate / result.amount
 
-          async convert <TO extends Currencies[keyof Currencies]>(
-             from: Currencies[keyof Currencies],
-             to:TO,
-             amount: number) 
-             {
-                const key = `${from}${to}` as TO extends string ? TO : never
-                if(this.caches[key]) {
-                    return this.caches[key]
-                }
-                const result = await fetch(
-                     `${this.api}/latest?from=${from}&to=${to}&amount=${amount}`).then((x) => x.json() as any as CurrencyResult<
-                     TO extends string ? TO : never>)
-                
+return rate
+}
+}
+type A = 'a'| 'b' | 1
 
-                
-            //this.caches[key] = result.rates['THB']
-            const rate = result.rates[to as TO extends string ? TO : never]
+type B = Extract<A,string>
+class Currency <
+const Currencies extends readonly string[] = [],  values extends string = Extract<Currencies [keyof Currencies],string>
+>{
+   private api = 'https://api.frankfurter.app'
 
-            this.caches[key] = rate
-            return rate
+  private caches: Record<string, number> = {}
+  constructor(public currencies: Currencies ) {}
 
-          }
+  a(a:Currencies){}
+  @cache
+  async convert <TO extends values>(
+     from: values,
+     to:TO,
+     amount: number) 
+     {
+      return fetch(
+       
+          `${this.api}/latest?from=${from}&to=${to}&amount=${amount}`).then((x) => x.json() as unknown as CurrencyResult<TO>
+      )
 
-          get lastest() {
-            return fetch(`${this.api}/latest`).then((x) => x.json())
-          }
+  }
 
-          
+  get lastest() {
+    return fetch(`${this.api}/latest`).then((x) => x.json())
+  }
+
+  
 }
 
 
-const myCurrency = new Currency(['USD','JPY','THB','ACT'])
+const myCurrency = new Currency(['USD','JPY','THB',])
 // as const เพื่อเป็นการ set ค่า ให้ string array สามารถถูกล็อคค่าไว้ให้อยู่ใน string array เท่านั้นที่ต้องทำเเบบนี้เพราะ string array ไม่ใช่  primitive data types ทำให้ type script ไม่สามรถจัดการได้ในวีธีปกติ
 
 
-
+myCurrency.convert('JPY','USD',1)
 
 const a = async () => {
-    await myCurrency.convert('USD','THB',1).then(console.log)
-    
+await myCurrency.convert('USD','THB',1).then(console.log)
+
 }
 
 a()
